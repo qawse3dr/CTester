@@ -11,7 +11,11 @@
    int passed;
    int failed;
  }result;*/
+#define _POSIX_SOURCE
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 199309
 #include "ctester.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +23,9 @@
 #include <sys/types.h>
 #include <signal.h>
 #include <unistd.h>
+#include <time.h>
+
+
 
 /*static vars to keep track of testing*/
 static long timeout = 2;
@@ -76,8 +83,8 @@ void startTest(char* desc){
   *@return result the results of the tests*/
 result endTest(){
   result res;
-  res.passed = sectionTestPassed;
-  res.failed = sectionCount-sectionTestPassed;
+  res.passed = testPassed;
+  res.failed = testCount-testPassed;
   if(!results){
     fprintf(stderr,"no test is currently running");
   }
@@ -117,8 +124,9 @@ result endTestSection(){
 
   //returns the tes results
   result res;
+
   res.passed = sectionTestPassed;
-  res.failed = sectionCount-sectionTestPassed;
+  res.failed = sectionTestCount-sectionTestPassed;
   return res;
  }
 
@@ -131,6 +139,9 @@ void ctest(char* desc,int(*testFun)()){
   sectionTestCount++;
   int status;
   int child_pid;
+  struct timespec time1;
+  time1.tv_sec = 0;
+  time1.tv_nsec = 100000000;
   //print description; have to flush
   //to make sure it prints before fork
   printf("Test %d (%s): ",sectionTestCount,desc);
@@ -143,14 +154,16 @@ void ctest(char* desc,int(*testFun)()){
     //parent lets it run for timeout then kills it
     //sleep(timeout);
     int i;
-    for(i = 0; i < timeout;i++){
+    for(i = 0; i < timeout*10;i++){//times 100 for milliseconds
       if(waitpid(child_pid, &status, WNOHANG)){
         break;
       }else{
-        sleep(1);
+        nanosleep(&time1,&time1);
       }
     }
-    if( i == timeout){
+
+    if( i == timeout*10){
+
       kill(child_pid,SIGKILL);
       //timed out
       status = SIGKILL;

@@ -48,9 +48,17 @@ int main(){
       ctest("This test will pass",testPass);
       ctest("This test will error out",testError);
       ctest("This test will segfault",testMemError);
-    endTestSection();
+    result secRes = endTestSection();
 
-  endTest();
 
+  result testRes = endTest();
+
+  printf("%d == %d, %d == %d\n",secRes.passed,secRes.failed,testRes.passed,testRes.failed);
+  if(secRes.passed == 1 && secRes.failed == 2){
+    printf("section 2 correct passed/failed\n");
+  }
+  if(testRes.passed == 3 && testRes.failed == 6){
+    printf("total passed/failed correct\n");
+  }
   return 0;
 }

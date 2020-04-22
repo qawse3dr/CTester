@@ -53,7 +53,6 @@ int main(){
 
   result testRes = endTest();
 
-  printf("%d == %d, %d == %d\n",secRes.passed,secRes.failed,testRes.passed,testRes.failed);
   if(secRes.passed == 1 && secRes.failed == 2){
     printf("section 2 correct passed/failed\n");
   }
